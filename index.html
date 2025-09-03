@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulasi Queue dengan Animasi</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #f4f7fb; }
+    h2 { color: #2c3e50; margin-top: 30px; }
+    .queue-container { display: flex; justify-content: center; margin: 15px 0; flex-wrap: wrap; min-height: 100px; }
+    .box {
+      width: 60px; height: 60px; margin: 5px;
+      background: #f1c40f; display: flex; align-items: center; justify-content: center;
+      font-weight: bold; border-radius: 8px; position: relative;
+      transition: all 0.5s ease;
+    }
+    .node { display: flex; align-items: center; margin: 5px; }
+    .node-box {
+      width: 60px; height: 60px;
+      background: #2ecc71; display: flex; align-items: center; justify-content: center;
+      font-weight: bold; border-radius: 8px; position: relative; color: white;
+      transition: all 0.5s ease;
+    }
+    .arrow { margin: 0 10px; font-size: 20px; font-weight: bold; color: #2c3e50; }
+    .front, .rear {
+      position: absolute; bottom: -20px; font-size: 12px; font-weight: bold;
+    }
+    .front { color: green; left: 50%; transform: translateX(-50%); }
+    .rear { color: red; right: 50%; transform: translateX(50%); }
+    .controls { margin: 10px 0; }
+    button {
+      padding: 8px 16px; margin: 5px; font-weight: bold; border: none; border-radius: 6px;
+      background: #3498db; color: white; cursor: pointer;
+    }
+    button:hover { background: #2980b9; }
+    input { padding: 6px; border-radius: 6px; border: 1px solid #ccc; }
+    .info { margin: 10px; font-style: italic; color: #2c3e50; }
+    hr { margin: 30px 0; }
+
+    /* Animations */
+    .fade-out { animation: fadeOut 0.6s forwards; }
+    @keyframes fadeOut { from {opacity:1;} to {opacity:0; transform: translateY(-20px);} }
+    .blink-green { animation: blinkGreen 0.6s; }
+    @keyframes blinkGreen { 0%,100%{background:#f1c40f;} 50%{background:#2ecc71;} }
+    .blink-red { animation: blinkRed 0.6s; }
+    @keyframes blinkRed { 0%,100%{background:#f1c40f;} 50%{background:#e74c3c;} }
+    .scale-in { animation: scaleIn 0.5s; }
+    @keyframes scaleIn { from {transform:scale(0);} to {transform:scale(1);} }
+  </style>
+</head>
+<body>
+
+  <h1>Simulasi Queue Interaktif dengan Animasi</h1>
+
+  <!-- Array Statis -->
+  <h2>Queue - Array Statis</h2>
+  <label>Kapasitas Array: </label>
+  <input type="number" id="capacityArray" value="5" min="1" max="15">
+  <button onclick="setArrayCapacity()">Set</button>
+  <div class="queue-container" id="queueArray"></div>
+  <div class="controls">
+    <input type="text" id="inputArray" placeholder="Data">
+    <button onclick="enqueueArray()">Enqueue</button>
+    <button onclick="dequeueArray()">Dequeue</button>
+    <button onclick="resetArray()">Reset</button>
+  </div>
+  <div class="info" id="infoArray">Masukkan kapasitas array dan mulai simulasi.</div>
+  <hr>
+
+  <!-- Linked List -->
+  <h2>Queue - Linked List</h2>
+  <div class="queue-container" id="queueLinked"></div>
+  <div class="controls">
+    <input type="text" id="inputLinked" placeholder="Data">
+    <button onclick="enqueueLinked()">Enqueue</button>
+    <button onclick="dequeueLinked()">Dequeue</button>
+    <button onclick="resetLinked()">Reset</button>
+  </div>
+  <div class="info" id="infoLinked">Queue siap digunakan.</div>
+  <hr>
+
+  <!-- Circular -->
+  <h2>Queue - Circular</h2>
+  <label>Kapasitas Circular Queue: </label>
+  <input type="number" id="capacityCircular" value="5" min="1" max="15">
+  <button onclick="setCircularCapacity()">Set</button>
+  <div class="queue-container" id="queueCircular"></div>
+  <div class="controls">
+    <input type="text" id="inputCircular" placeholder="Data">
+    <button onclick="enqueueCircular()">Enqueue</button>
+    <button onclick="dequeueCircular()">Dequeue</button>
+    <button onclick="resetCircular()">Reset</button>
+  </div>
+  <div class="info" id="infoCircular">Masukkan kapasitas circular dan mulai simulasi.</div>
+
+  <script>
+    // ===== ARRAY STATIS =====
+    let queueArray = [];
+    let maxArray = 5;
+
+    function setArrayCapacity(){
+      maxArray = parseInt(document.getElementById("capacityArray").value);
+      resetArray();
+      setInfo("infoArray",`Kapasitas array diatur ke ${maxArray}.`,"blue");
+    }
+
+    function renderArray(){
+      const div=document.getElementById("queueArray");
+      div.innerHTML="";
+      for (let i=0;i<maxArray;i++){
+        const box=document.createElement("div");
+        box.className="box";
+        if(i<queueArray.length){ box.textContent=queueArray[i]; }
+        if(i===0&&queueArray.length>0){
+          const f=document.createElement("div"); f.className="front"; f.textContent="Front"; box.appendChild(f);
+        }
+        if(i===queueArray.length-1&&queueArray.length>0){
+          const r=document.createElement("div"); r.className="rear"; r.textContent="Rear"; box.appendChild(r);
+        }
+        div.appendChild(box);
+      }
+    }
+    function enqueueArray(){
+      const val=document.getElementById("inputArray").value.trim();
+      if(!val) return setInfo("infoArray","Masukkan data dulu","red");
+      if(queueArray.length>=maxArray) return setInfo("infoArray","Queue penuh!","red");
+      queueArray.push(val);
+      setInfo("infoArray",`Enqueue: ${val} masuk ke Rear (Array Statis).`,"blue");
+      document.getElementById("inputArray").value="";
+      renderArray();
+    }
+    function dequeueArray(){
+      if(queueArray.length===0) return setInfo("infoArray","Queue kosong!","red");
+      const div=document.getElementById("queueArray");
+      const firstBox=div.querySelector(".box");
+      firstBox.classList.add("fade-out");
+      setTimeout(()=>{ 
+        const removed=queueArray.shift(); 
+        setInfo("infoArray",`Dequeue: ${removed} keluar, elemen bergeser ke kiri.`,"blue");
+        renderArray(); 
+      },600);
+    }
+    function resetArray(){ queueArray=[]; renderArray(); setInfo("infoArray","Queue direset.","blue"); }
+
+    // ===== LINKED LIST =====
+    let queueLinked=[];
+    function renderLinked(){
+      const div=document.getElementById("queueLinked");
+      div.innerHTML="";
+      queueLinked.forEach((item,i)=>{
+        const node=document.createElement("div");
+        node.className="node";
+        const box=document.createElement("div");
+        box.className="node-box";
+        box.textContent=item;
+        if(i===0){const f=document.createElement("div");f.className="front";f.textContent="Front";box.appendChild(f);}
+        if(i===queueLinked.length-1){const r=document.createElement("div");r.className="rear";r.textContent="Rear";box.appendChild(r);}
+        node.appendChild(box);
+        if(i<queueLinked.length-1){const arrow=document.createElement("div");arrow.className="arrow";arrow.textContent="→";node.appendChild(arrow);}
+        div.appendChild(node);
+      });
+    }
+    function enqueueLinked(){
+      const val=document.getElementById("inputLinked").value.trim();
+      if(!val) return setInfo("infoLinked","Masukkan data dulu","red");
+      queueLinked.push(val);
+      setInfo("infoLinked",`Enqueue: ${val} masuk ke Rear (Linked List).`,"blue");
+      document.getElementById("inputLinked").value="";
+      renderLinked();
+      const lastNode=document.querySelector("#queueLinked .node:last-child .node-box");
+      if(lastNode) lastNode.classList.add("scale-in");
+    }
+    function dequeueLinked(){
+      if(queueLinked.length===0) return setInfo("infoLinked","Queue kosong!","red");
+      const firstBox=document.querySelector("#queueLinked .node .node-box");
+      firstBox.classList.add("fade-out");
+      setTimeout(()=>{
+        const removed=queueLinked.shift();
+        setInfo("infoLinked",`Dequeue: ${removed} keluar dari Front (Linked List).`,"blue");
+        renderLinked();
+      },600);
+    }
+    function resetLinked(){ queueLinked=[]; renderLinked(); setInfo("infoLinked","Queue direset.","blue"); }
+
+    // ===== CIRCULAR =====
+    let queueCircular=[]; let frontC=-1,rearC=-1,maxC=5;
+    function setCircularCapacity(){
+      maxC=parseInt(document.getElementById("capacityCircular").value);
+      resetCircular();
+      setInfo("infoCircular",`Kapasitas circular diatur ke ${maxC}.`,"blue");
+    }
+    function renderCircular(){
+      const div=document.getElementById("queueCircular");
+      div.innerHTML="";
+      for(let i=0;i<maxC;i++){
+        const box=document.createElement("div");
+        box.className="box";
+        if(queueCircular[i]) box.textContent=queueCircular[i];
+        if(i===frontC&&frontC!==-1){const f=document.createElement("div");f.className="front";f.textContent="Front";box.appendChild(f);}
+        if(i===rearC&&rearC!==-1){const r=document.createElement("div");r.className="rear";r.textContent="Rear";box.appendChild(r);}
+        div.appendChild(box);
+      }
+    }
+    function enqueueCircular(){
+      const val=document.getElementById("inputCircular").value.trim();
+      if(!val) return setInfo("infoCircular","Masukkan data dulu","red");
+      if((frontC===0&&rearC===maxC-1)||(rearC+1)%maxC===frontC) return setInfo("infoCircular","Queue penuh (Circular)!","red");
+      if(frontC===-1){frontC=0;rearC=0;} else rearC=(rearC+1)%maxC;
+      queueCircular[rearC]=val;
+      setInfo("infoCircular",`Enqueue: ${val} masuk ke Rear (Circular).`,"blue");
+      renderCircular();
+      const boxes=document.querySelectorAll("#queueCircular .box");
+      boxes[rearC].classList.add("blink-green");
+      document.getElementById("inputCircular").value="";
+    }
+    function dequeueCircular(){
+      if(frontC===-1) return setInfo("infoCircular","Queue kosong!","red");
+      const boxes=document.querySelectorAll("#queueCircular .box");
+      boxes[frontC].classList.add("blink-red");
+      setTimeout(()=>{
+        const removed=queueCircular[frontC];
+        queueCircular[frontC]=null;
+        if(frontC===rearC){frontC=-1;rearC=-1;} else frontC=(frontC+1)%maxC;
+        setInfo("infoCircular",`Dequeue: ${removed} keluar dari Front (Circular).`,"blue");
+        renderCircular();
+      },600);
+    }
+    function resetCircular(){queueCircular=new Array(maxC).fill(null);frontC=-1;rearC=-1;renderCircular();setInfo("infoCircular","Queue direset.","blue");}
+
+    // Helper
+    function setInfo(id,msg,color){const el=document.getElementById(id);el.textContent=msg;el.style.color=color;}
+
+    renderArray();renderLinked();renderCircular();
+  </script>
+</body>
+</html>
