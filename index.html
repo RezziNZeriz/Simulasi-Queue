@@ -2,36 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Simulasi Queue dengan Animasi</title>
+  <title>Simulasi Queue dengan Animasi (Hero Green & Brave Pink)</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #f4f7fb; }
-    h2 { color: #2c3e50; margin-top: 30px; }
+    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background: #fff0f6; }
+    h2 { color: #009739; margin-top: 30px; }
     .queue-container { display: flex; justify-content: center; margin: 15px 0; flex-wrap: wrap; min-height: 100px; }
     .box {
       width: 60px; height: 60px; margin: 5px;
-      background: #f1c40f; display: flex; align-items: center; justify-content: center;
+      background: #009739; color:white;
+      display: flex; align-items: center; justify-content: center;
       font-weight: bold; border-radius: 8px; position: relative;
       transition: all 0.5s ease;
     }
     .node { display: flex; align-items: center; margin: 5px; }
     .node-box {
       width: 60px; height: 60px;
-      background: #2ecc71; display: flex; align-items: center; justify-content: center;
+      background: #009739; display: flex; align-items: center; justify-content: center;
       font-weight: bold; border-radius: 8px; position: relative; color: white;
       transition: all 0.5s ease;
     }
-    .arrow { margin: 0 10px; font-size: 20px; font-weight: bold; color: #2c3e50; }
+    .arrow { margin: 0 10px; font-size: 20px; font-weight: bold; color: #ED1E79; }
     .front, .rear {
       position: absolute; bottom: -20px; font-size: 12px; font-weight: bold;
     }
-    .front { color: green; left: 50%; transform: translateX(-50%); }
-    .rear { color: red; right: 50%; transform: translateX(50%); }
+    .front { color: #ED1E79; left: 50%; transform: translateX(-50%); }
+    .rear { color: #ED1E79; right: 50%; transform: translateX(50%); }
     .controls { margin: 10px 0; }
     button {
       padding: 8px 16px; margin: 5px; font-weight: bold; border: none; border-radius: 6px;
-      background: #3498db; color: white; cursor: pointer;
+      background: #ED1E79; color: white; cursor: pointer;
     }
-    button:hover { background: #2980b9; }
+    button:hover { background: #c21561; }
     input { padding: 6px; border-radius: 6px; border: 1px solid #ccc; }
     .info { margin: 10px; font-style: italic; color: #2c3e50; }
     hr { margin: 30px 0; }
@@ -40,16 +41,16 @@
     .fade-out { animation: fadeOut 0.6s forwards; }
     @keyframes fadeOut { from {opacity:1;} to {opacity:0; transform: translateY(-20px);} }
     .blink-green { animation: blinkGreen 0.6s; }
-    @keyframes blinkGreen { 0%,100%{background:#f1c40f;} 50%{background:#2ecc71;} }
+    @keyframes blinkGreen { 0%,100%{background:#009739;} 50%{background:#33cc7a;} }
     .blink-red { animation: blinkRed 0.6s; }
-    @keyframes blinkRed { 0%,100%{background:#f1c40f;} 50%{background:#e74c3c;} }
+    @keyframes blinkRed { 0%,100%{background:#009739;} 50%{background:#ED1E79;} }
     .scale-in { animation: scaleIn 0.5s; }
     @keyframes scaleIn { from {transform:scale(0);} to {transform:scale(1);} }
   </style>
 </head>
 <body>
 
-  <h1>Simulasi Queue Interaktif dengan Animasi</h1>
+  <h1 style="color:#ED1E79">Simulasi Queue Interaktif</h1>
 
   <!-- Array Statis -->
   <h2>Queue - Array Statis</h2>
@@ -93,143 +94,198 @@
   <div class="info" id="infoCircular">Masukkan kapasitas circular dan mulai simulasi.</div>
 
   <script>
-    // ===== ARRAY STATIS =====
-    let queueArray = [];
-    let maxArray = 5;
+    // ==============================
+    // BAGIAN ARRAY STATIS
+    // ==============================
 
+    let queueArray = []; // variabel untuk nyimpen data queue
+    let maxArray = 5;    // kapasitas default queue array
+
+    // fungsi buat atur kapasitas array (user bisa set kapasitas max)
     function setArrayCapacity(){
-      maxArray = parseInt(document.getElementById("capacityArray").value);
-      resetArray();
+      maxArray = parseInt(document.getElementById("capacityArray").value); // ambil input dari user
+      resetArray(); // reset biar antrian kosong lagi
       setInfo("infoArray",`Kapasitas array diatur ke ${maxArray}.`,"blue");
     }
 
+    // fungsi untuk nampilin (render) queue array ke layar
     function renderArray(){
       const div=document.getElementById("queueArray");
-      div.innerHTML="";
-      for (let i=0;i<maxArray;i++){
+      div.innerHTML=""; // hapus tampilan sebelumnya biar ga dobel
+      for (let i=0;i<maxArray;i++){ // looping sesuai kapasitas
         const box=document.createElement("div");
         box.className="box";
-        if(i<queueArray.length){ box.textContent=queueArray[i]; }
-        if(i===0&&queueArray.length>0){
+        if(i<queueArray.length){ box.textContent=queueArray[i]; } // kalau ada data, tampilkan
+        if(i===0&&queueArray.length>0){ // kasih label front di kotak pertama
           const f=document.createElement("div"); f.className="front"; f.textContent="Front"; box.appendChild(f);
         }
-        if(i===queueArray.length-1&&queueArray.length>0){
+        if(i===queueArray.length-1&&queueArray.length>0){ // kasih label rear di kotak terakhir
           const r=document.createElement("div"); r.className="rear"; r.textContent="Rear"; box.appendChild(r);
         }
         div.appendChild(box);
       }
     }
+
+    // fungsi enqueue (nambah data ke belakang antrian)
     function enqueueArray(){
-      const val=document.getElementById("inputArray").value.trim();
-      if(!val) return setInfo("infoArray","Masukkan data dulu","red");
-      if(queueArray.length>=maxArray) return setInfo("infoArray","Queue penuh!","red");
-      queueArray.push(val);
+      const val=document.getElementById("inputArray").value.trim(); // ambil input
+      if(!val) return setInfo("infoArray","Masukkan data dulu","red"); // kalau kosong
+      if(queueArray.length>=maxArray) return setInfo("infoArray","Queue penuh!","red"); // kalau penuh
+      queueArray.push(val); // masukin data ke rear
       setInfo("infoArray",`Enqueue: ${val} masuk ke Rear (Array Statis).`,"blue");
       document.getElementById("inputArray").value="";
-      renderArray();
+      renderArray(); // refresh tampilan
     }
+
+    // fungsi dequeue (hapus data dari depan antrian)
     function dequeueArray(){
       if(queueArray.length===0) return setInfo("infoArray","Queue kosong!","red");
       const div=document.getElementById("queueArray");
-      const firstBox=div.querySelector(".box");
-      firstBox.classList.add("fade-out");
+      const firstBox=div.querySelector(".box"); // ambil kotak depan
+      firstBox.classList.add("fade-out"); // animasi fade-out
       setTimeout(()=>{ 
-        const removed=queueArray.shift(); 
+        const removed=queueArray.shift(); // hapus elemen paling depan
         setInfo("infoArray",`Dequeue: ${removed} keluar, elemen bergeser ke kiri.`,"blue");
-        renderArray(); 
+        renderArray(); // refresh tampilan
       },600);
     }
+
+    // fungsi reset (kosongin queue)
     function resetArray(){ queueArray=[]; renderArray(); setInfo("infoArray","Queue direset.","blue"); }
 
-    // ===== LINKED LIST =====
-    let queueLinked=[];
+    // ==============================
+    // BAGIAN LINKED LIST
+    // ==============================
+
+    let queueLinked=[]; // variabel simpan node linked list
+
+    // render linked list
     function renderLinked(){
       const div=document.getElementById("queueLinked");
-      div.innerHTML="";
+      div.innerHTML=""; // kosongin tampilan dulu
       queueLinked.forEach((item,i)=>{
-        const node=document.createElement("div");
+        const node=document.createElement("div"); // wadah node
         node.className="node";
-        const box=document.createElement("div");
+        const box=document.createElement("div"); // kotak data
         box.className="node-box";
         box.textContent=item;
-        if(i===0){const f=document.createElement("div");f.className="front";f.textContent="Front";box.appendChild(f);}
-        if(i===queueLinked.length-1){const r=document.createElement("div");r.className="rear";r.textContent="Rear";box.appendChild(r);}
+        if(i===0){const f=document.createElement("div");f.className="front";f.textContent="Front";box.appendChild(f);} // label front
+        if(i===queueLinked.length-1){const r=document.createElement("div");r.className="rear";r.textContent="Rear";box.appendChild(r);} // label rear
         node.appendChild(box);
-        if(i<queueLinked.length-1){const arrow=document.createElement("div");arrow.className="arrow";arrow.textContent="→";node.appendChild(arrow);}
+        if(i<queueLinked.length-1){ // panah antar node
+          const arrow=document.createElement("div");arrow.className="arrow";arrow.textContent="→";node.appendChild(arrow);
+        }
         div.appendChild(node);
       });
     }
+
+    // enqueue linked list
     function enqueueLinked(){
       const val=document.getElementById("inputLinked").value.trim();
       if(!val) return setInfo("infoLinked","Masukkan data dulu","red");
-      queueLinked.push(val);
+      queueLinked.push(val); // tambahin node baru ke belakang
       setInfo("infoLinked",`Enqueue: ${val} masuk ke Rear (Linked List).`,"blue");
       document.getElementById("inputLinked").value="";
       renderLinked();
       const lastNode=document.querySelector("#queueLinked .node:last-child .node-box");
-      if(lastNode) lastNode.classList.add("scale-in");
+      if(lastNode) lastNode.classList.add("scale-in"); // animasi node muncul
     }
+
+    // dequeue linked list
     function dequeueLinked(){
       if(queueLinked.length===0) return setInfo("infoLinked","Queue kosong!","red");
       const firstBox=document.querySelector("#queueLinked .node .node-box");
-      firstBox.classList.add("fade-out");
+      firstBox.classList.add("fade-out"); // animasi fade-out untuk node pertama
       setTimeout(()=>{
-        const removed=queueLinked.shift();
+        const removed=queueLinked.shift(); // hapus node depan
         setInfo("infoLinked",`Dequeue: ${removed} keluar dari Front (Linked List).`,"blue");
         renderLinked();
       },600);
     }
+
+    // reset linked list
     function resetLinked(){ queueLinked=[]; renderLinked(); setInfo("infoLinked","Queue direset.","blue"); }
 
-    // ===== CIRCULAR =====
-    let queueCircular=[]; let frontC=-1,rearC=-1,maxC=5;
+    // ==============================
+    // BAGIAN CIRCULAR QUEUE
+    // ==============================
+
+    let queueCircular=[]; 
+    let frontC=-1,rearC=-1,maxC=5; // inisialisasi awal
+
+    // set kapasitas circular queue
     function setCircularCapacity(){
       maxC=parseInt(document.getElementById("capacityCircular").value);
       resetCircular();
       setInfo("infoCircular",`Kapasitas circular diatur ke ${maxC}.`,"blue");
     }
+
+    // render circular queue
     function renderCircular(){
       const div=document.getElementById("queueCircular");
       div.innerHTML="";
-      for(let i=0;i<maxC;i++){
+      for(let i=0;i<maxC;i++){ // looping sesuai kapasitas
         const box=document.createElement("div");
         box.className="box";
-        if(queueCircular[i]) box.textContent=queueCircular[i];
-        if(i===frontC&&frontC!==-1){const f=document.createElement("div");f.className="front";f.textContent="Front";box.appendChild(f);}
-        if(i===rearC&&rearC!==-1){const r=document.createElement("div");r.className="rear";r.textContent="Rear";box.appendChild(r);}
+        if(queueCircular[i]) box.textContent=queueCircular[i]; // isi data kalo ada
+        if(i===frontC&&frontC!==-1){const f=document.createElement("div");f.className="front";f.textContent="Front";box.appendChild(f);} // label front
+        if(i===rearC&&rearC!==-1){const r=document.createElement("div");r.className="rear";r.textContent="Rear";box.appendChild(r);} // label rear
         div.appendChild(box);
       }
     }
+
+    // enqueue circular
     function enqueueCircular(){
       const val=document.getElementById("inputCircular").value.trim();
       if(!val) return setInfo("infoCircular","Masukkan data dulu","red");
+      // kondisi full: kalau rear ada di belakang front
       if((frontC===0&&rearC===maxC-1)||(rearC+1)%maxC===frontC) return setInfo("infoCircular","Queue penuh (Circular)!","red");
-      if(frontC===-1){frontC=0;rearC=0;} else rearC=(rearC+1)%maxC;
-      queueCircular[rearC]=val;
+      if(frontC===-1){frontC=0;rearC=0;} else rearC=(rearC+1)%maxC; // geser rear melingkar
+      queueCircular[rearC]=val; // isi data di rear
       setInfo("infoCircular",`Enqueue: ${val} masuk ke Rear (Circular).`,"blue");
       renderCircular();
       const boxes=document.querySelectorAll("#queueCircular .box");
-      boxes[rearC].classList.add("blink-green");
+      boxes[rearC].classList.add("blink-green"); // animasi blink hijau
       document.getElementById("inputCircular").value="";
     }
+
+    // dequeue circular
     function dequeueCircular(){
       if(frontC===-1) return setInfo("infoCircular","Queue kosong!","red");
       const boxes=document.querySelectorAll("#queueCircular .box");
-      boxes[frontC].classList.add("blink-red");
+      boxes[frontC].classList.add("blink-red"); // animasi blink merah
       setTimeout(()=>{
-        const removed=queueCircular[frontC];
+        const removed=queueCircular[frontC]; // hapus elemen di front
         queueCircular[frontC]=null;
-        if(frontC===rearC){frontC=-1;rearC=-1;} else frontC=(frontC+1)%maxC;
+        if(frontC===rearC){frontC=-1;rearC=-1;} else frontC=(frontC+1)%maxC; // geser front melingkar
         setInfo("infoCircular",`Dequeue: ${removed} keluar dari Front (Circular).`,"blue");
         renderCircular();
       },600);
     }
-    function resetCircular(){queueCircular=new Array(maxC).fill(null);frontC=-1;rearC=-1;renderCircular();setInfo("infoCircular","Queue direset.","blue");}
 
-    // Helper
-    function setInfo(id,msg,color){const el=document.getElementById(id);el.textContent=msg;el.style.color=color;}
+    // reset circular
+    function resetCircular(){
+      queueCircular=new Array(maxC).fill(null); // bikin array kosong sesuai kapasitas
+      frontC=-1;rearC=-1;
+      renderCircular();
+      setInfo("infoCircular","Queue direset.","blue");
+    }
 
-    renderArray();renderLinked();renderCircular();
+    // ==============================
+    // FUNGSI BANTUAN
+    // ==============================
+
+    // setInfo dipake buat update teks info (status)
+    function setInfo(id,msg,color){
+      const el=document.getElementById(id);
+      el.textContent=msg; // ubah isi teks
+      el.style.color=color; // ubah warnanya
+    }
+
+    // render pertama kali pas page dibuka
+    renderArray();
+    renderLinked();
+    renderCircular();
   </script>
 </body>
 </html>
